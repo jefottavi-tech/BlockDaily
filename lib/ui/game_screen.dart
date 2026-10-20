@@ -7,6 +7,7 @@ import '../game/board.dart';
 import '../game/game.dart';
 import '../services/ad_service.dart';
 import '../services/share_text.dart';
+import '../services/sound_service.dart';
 import '../services/stats_store.dart';
 import 'board_view.dart';
 import 'palette.dart';
@@ -34,9 +35,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   double _cell = 32;
 
   // Effects.
-  late final _clearAnim = AnimationController(vsync: this, duration: const Duration(milliseconds: 380));
-  late final _popupAnim = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+  late final _clearAnim = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+  late final _popupAnim = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100));
   List<FlashCell> _flash = const [];
+  List<Particle> _particles = const [];
+  double _shake = 0; // shake strength in pixels for the current clear
+  String _praise = '';
   String _popup = '';
 
   bool _over = false;
@@ -45,6 +49,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   late StatsStore _stats;
   late AdService _ads;
+  late SoundService _sound;
 
   bool get _isDaily => game.mode == GameMode.daily;
   bool get _canRevive => !_isDaily && !game.revived;
@@ -55,12 +60,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final services = Services.of(context);
     _stats = services.stats;
     _ads = services.ads;
+    _sound = services.sound;
   }
 
   @override
   void dispose() {
-    // Leaving a daily midway still uses today's attempt.
-    if (_isDaily && game.score > 0) _record();
     _clearAnim.dispose();
     _popupAnim.dispose();
     super.dispose();
@@ -77,6 +81,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       _dragGlobal = global;
       _ghost = _target();
     });
+    _sound.play(Sfx.pick);
   }
 
   void _dragUpdate(Offset global) {
@@ -123,32 +128,45 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     final move = game.place(slot, ghost.row, ghost.col);
     if (move.clear.isEmpty) {
       HapticFeedback.selectionClick();
+      _sound.play(Sfx.place);
     } else {
-      HapticFeedback.mediumImpact();
+      final lines = move.clear.lines;
+      lines >= 2 || move.perfect ? HapticFeedback.heavyImpact() : HapticFeedback.mediumImpact();
+      _sound.play(move.perfect ? Sfx.perfect : SoundService.clearFor(move.combo));
       _flash = flash;
+      _particles = Particle.burst(flash, lines: lines, seed: game.score);
+      _shake = move.perfect ? 10 : (lines >= 2 ? 3.0 + lines * 2 : 0);
       _clearAnim.forward(from: 0);
+      _praise = praiseFor(lines, perfect: move.perfect);
       _popup = [
         '+${move.points}',
-        if (move.clear.lines > 1) '${move.clear.lines} lines!',
         if (move.combo > 1) 'Combo x${move.combo}',
-      ].join('\n');
+      ].join('  ');
       _popupAnim.forward(from: 0);
     }
     setState(() {});
-    if (game.isOver) Future.delayed(const Duration(milliseconds: 450), _gameOver);
+    if (game.isOver) {
+      Future.delayed(const Duration(milliseconds: 450), _gameOver);
+    } else {
+      _save();
+    }
   }
+
+  void _save() => _stats.saveGame(game.mode.name, game.toJson());
 
   // ---- end of game ----
 
   void _gameOver() {
     if (!mounted) return;
     setState(() => _over = true);
+    _sound.play(Sfx.gameover);
     if (!_canRevive) _record();
   }
 
   Future<void> _record() async {
     if (_recorded) return;
     _recorded = true;
+    await _stats.clearGame(game.mode.name);
     if (_isDaily) {
       await _stats.recordDaily(DailyResult(
           number: game.dailyNumber!, score: game.score, bestCombo: game.bestCombo, lines: game.linesCleared));
@@ -164,6 +182,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       game.revive();
       _over = false;
     });
+    _save();
   }
 
   Future<void> _playAgain() async {
@@ -215,6 +234,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     best: max(stats.bestScore, _isDaily ? 0 : game.score),
                     showBest: !_isDaily,
                     combo: game.combo,
+                    muted: _sound.muted,
+                    onToggleSound: () async {
+                      await _sound.setMuted(!_sound.muted);
+                      setState(() {});
+                    },
                     onBack: () => Navigator.maybePop(context),
                   ),
                   const Spacer(),
@@ -222,10 +246,23 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     dimension: boardSize,
                     child: AnimatedBuilder(
                       animation: _clearAnim,
-                      builder: (context, _) => CustomPaint(
-                        key: _boardKey,
-                        painter: BoardPainter(board: game.board, ghost: _ghost, flash: _flash, flashT: _clearAnim.value),
-                      ),
+                      builder: (context, _) {
+                        final t = _clearAnim.value;
+                        final shake = t < 0.4 ? sin(t * 70) * _shake * (1 - t / 0.4) : 0.0;
+                        return Transform.translate(
+                          offset: Offset(shake, shake * 0.4),
+                          child: CustomPaint(
+                            key: _boardKey,
+                            painter: BoardPainter(
+                              board: game.board,
+                              ghost: _ghost,
+                              flash: _flash,
+                              particles: _particles,
+                              fxT: t,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const Spacer(),
@@ -257,32 +294,31 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   const SizedBox(height: 56), // reserved for the banner ad
                 ],
               ),
-              // Score popup above the board.
+              // Praise and points over the board.
               Positioned(
                 left: 0,
                 right: 0,
-                top: constraints.maxHeight * 0.16,
+                top: constraints.maxHeight * 0.24,
                 child: IgnorePointer(
                   child: AnimatedBuilder(
                     animation: _popupAnim,
                     builder: (context, _) {
                       final t = _popupAnim.value;
                       if (t == 0 || t == 1) return const SizedBox.shrink();
+                      final pop = Curves.elasticOut.transform(min(1.0, t * 2.5));
+                      final fade = t < 0.7 ? 1.0 : (1 - t) / 0.3;
                       return Opacity(
-                        opacity: (1 - t) * 1.2 > 1 ? 1 : (1 - t) * 1.2,
+                        opacity: fade.clamp(0, 1),
                         child: Transform.translate(
-                          offset: Offset(0, -40 * t),
-                          child: Text(
-                            _popup,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: accent,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
-                              height: 1.15,
-                              shadows: [Shadow(blurRadius: 12, color: Colors.black54)],
-                            ),
-                          ),
+                          offset: Offset(0, -30 * t),
+                          child: Column(mainAxisSize: MainAxisSize.min, children: [
+                            if (_praise.isNotEmpty)
+                              Transform.scale(
+                                scale: 0.4 + 0.6 * pop,
+                                child: Text(_praise, key: const Key('praise'), style: _praiseStyle),
+                              ),
+                            Text(_popup, key: const Key('popup'), style: _pointsStyle),
+                          ]),
                         ),
                       );
                     },
@@ -322,6 +358,8 @@ class _TopBar extends StatelessWidget {
     required this.best,
     required this.showBest,
     required this.combo,
+    required this.muted,
+    required this.onToggleSound,
     required this.onBack,
   });
 
@@ -330,6 +368,8 @@ class _TopBar extends StatelessWidget {
   final int best;
   final bool showBest;
   final int combo;
+  final bool muted;
+  final VoidCallback onToggleSound;
   final VoidCallback onBack;
 
   @override
@@ -339,6 +379,11 @@ class _TopBar extends StatelessWidget {
       child: Column(children: [
         Row(children: [
           IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back_rounded, color: Colors.white70)),
+          IconButton(
+            key: const Key('mute'),
+            onPressed: onToggleSound,
+            icon: Icon(muted ? Icons.volume_off_rounded : Icons.volume_up_rounded, color: Colors.white54),
+          ),
           if (title != null)
             Text(title!, style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w700, fontSize: 16)),
           const Spacer(),
@@ -448,3 +493,29 @@ class _GameOverPanel extends StatelessWidget {
     );
   }
 }
+
+/// Callout for a clear; single lines get none so the big ones feel special.
+String praiseFor(int lines, {bool perfect = false}) {
+  if (perfect) return 'PERFECT!';
+  return switch (lines) {
+    <= 1 => '',
+    2 => 'Great!',
+    3 => 'Amazing!',
+    _ => 'Unbelievable!',
+  };
+}
+
+const _praiseStyle = TextStyle(
+  color: Colors.white,
+  fontSize: 44,
+  fontWeight: FontWeight.w900,
+  letterSpacing: 1,
+  shadows: [Shadow(blurRadius: 18, color: Color(0xFFFF8A3D)), Shadow(blurRadius: 4, color: Colors.black54)],
+);
+
+const _pointsStyle = TextStyle(
+  color: accent,
+  fontSize: 26,
+  fontWeight: FontWeight.w900,
+  shadows: [Shadow(blurRadius: 12, color: Colors.black54)],
+);

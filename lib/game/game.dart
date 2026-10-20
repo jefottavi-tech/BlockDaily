@@ -7,10 +7,13 @@ enum GameMode { classic, daily }
 
 /// Outcome of one placement, for scoring feedback and effects.
 class Move {
-  const Move({required this.clear, required this.points, required this.combo});
+  const Move({required this.clear, required this.points, required this.combo, this.perfect = false});
 
   final Clear clear;
   final int points;
+
+  /// The move emptied the whole board.
+  final bool perfect;
 
   /// Combo level after this move (0 = no active combo).
   final int combo;
@@ -48,6 +51,9 @@ class Game {
   int _movesSinceClear = 0;
   bool revived = false;
 
+  /// Number of 3-piece sets dealt; lets a saved daily game replay its piece sequence.
+  int _deals = 0;
+
   /// A combo survives this many placements without a clear.
   static const comboGrace = 3;
 
@@ -65,6 +71,7 @@ class Game {
     tray[slot] = null;
 
     var points = p.size;
+    final perfect = !clear.isEmpty && board.isEmpty;
     if (clear.isEmpty) {
       if (++_movesSinceClear >= comboGrace) combo = 0;
     } else {
@@ -73,13 +80,13 @@ class Game {
       linesCleared += clear.lines;
       // 10 per line, more for clearing several at once, multiplied by the combo.
       points += 10 * clear.lines * clear.lines * combo;
-      if (board.isEmpty) points += 300; // perfect clear
+      if (perfect) points += 300;
     }
     score += points;
     bestCombo = max(bestCombo, combo);
 
     if (tray.every((p) => p == null)) _deal();
-    return Move(clear: clear, points: points, combo: combo);
+    return Move(clear: clear, points: points, combo: combo, perfect: perfect);
   }
 
   /// Second chance after game over (rewarded ad): a fresh set of pieces that all fit.
@@ -92,6 +99,7 @@ class Game {
   }
 
   void _deal() {
+    _deals++;
     if (mode == GameMode.daily) {
       for (var i = 0; i < tray.length; i++) {
         tray[i] = randomPiece(_rng);
@@ -105,6 +113,50 @@ class Game {
       if (tray.any((p) => board.canPlaceAnywhere(p!))) return;
     }
   }
+}
+
+// ---- saving a game in progress ----
+
+extension GameSave on Game {
+  Map<String, dynamic> toJson() => {
+        'mode': mode.name,
+        'daily': dailyNumber,
+        'cells': board.cells,
+        'tray': [for (final p in tray) p?.id],
+        'score': score,
+        'combo': combo,
+        'bestCombo': bestCombo,
+        'lines': linesCleared,
+        'sinceClear': _movesSinceClear,
+        'revived': revived,
+        'deals': _deals,
+      };
+}
+
+Game gameFromJson(Map<String, dynamic> json, {Random? random}) {
+  final Game g;
+  if (json['mode'] == GameMode.daily.name) {
+    g = Game.daily(json['daily'] as int);
+    // Advance the seeded sequence to where the saved game was.
+    while (g._deals < (json['deals'] as int)) {
+      g._deal();
+    }
+  } else {
+    g = Game.classic(random: random);
+  }
+  g.board.cells.setAll(0, List<int>.from(json['cells'] as List));
+  final tray = List<String?>.from(json['tray'] as List);
+  for (var i = 0; i < g.tray.length; i++) {
+    g.tray[i] = tray[i] == null ? null : piecesById[tray[i]];
+  }
+  g
+    ..score = json['score'] as int
+    ..combo = json['combo'] as int
+    ..bestCombo = json['bestCombo'] as int
+    ..linesCleared = json['lines'] as int
+    .._movesSinceClear = json['sinceClear'] as int
+    ..revived = json['revived'] as bool;
+  return g;
 }
 
 /// Daily puzzle number: days since launch day, starting at 1.

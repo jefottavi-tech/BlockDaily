@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Result of a finished daily puzzle.
@@ -59,4 +61,16 @@ class StatsStore {
     }
     return streak;
   }
+
+  bool get muted => _prefs.getBool('muted') ?? false;
+  Future<void> setMuted(bool value) => _prefs.setBool('muted', value);
+
+  // Game in progress, one slot per mode ('classic' / 'daily').
+  Map<String, dynamic>? savedGame(String mode) {
+    final raw = _prefs.getString('save.$mode');
+    return raw == null ? null : jsonDecode(raw) as Map<String, dynamic>;
+  }
+
+  Future<void> saveGame(String mode, Map<String, dynamic> json) => _prefs.setString('save.$mode', jsonEncode(json));
+  Future<void> clearGame(String mode) => _prefs.remove('save.$mode');
 }

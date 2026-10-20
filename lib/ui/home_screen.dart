@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../game/game.dart';
 import '../game/pieces.dart';
 import '../services/share_text.dart';
+import '../services/stats_store.dart';
 import 'board_view.dart';
 import 'game_screen.dart';
 import 'palette.dart';
@@ -17,6 +18,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  /// Classic: resume the saved game if there is one.
+  Game _classic(StatsStore stats) {
+    final saved = stats.savedGame(GameMode.classic.name);
+    return saved == null ? Game.classic() : gameFromJson(saved);
+  }
+
+  /// Daily: resume today's game; a game left unfinished on an earlier day counts as that day's result.
+  Future<Game> _daily(StatsStore stats, int today) async {
+    final saved = stats.savedGame(GameMode.daily.name);
+    if (saved != null) {
+      final game = gameFromJson(saved);
+      if (game.dailyNumber == today) return game;
+      await stats.recordDaily(DailyResult(
+          number: game.dailyNumber!, score: game.score, bestCombo: game.bestCombo, lines: game.linesCleared));
+      await stats.clearGame(GameMode.daily.name);
+    }
+    return Game.daily(today);
+  }
+
   Future<void> _open(Game game) async {
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => GameScreen(game: game)));
     if (mounted) setState(() {}); // refresh best score and daily status
@@ -62,15 +82,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
                   ),
-                  onPressed: () => _open(Game.classic()),
-                  child: const Text('PLAY'),
+                  onPressed: () => _open(_classic(stats)),
+                  child: Text(stats.savedGame(GameMode.classic.name) == null ? 'PLAY' : 'CONTINUE'),
                 ),
                 const SizedBox(height: 16),
                 _DailyCard(
                   number: today,
                   score: daily?.score,
                   streak: streak,
-                  onPlay: () => _open(Game.daily(today)),
+                  onPlay: () async => _open(await _daily(stats, today)),
                   onShare: daily == null
                       ? null
                       : () => shareText(context, dailyShareText(daily, streak: streak)),

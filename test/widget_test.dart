@@ -5,6 +5,7 @@ import 'package:block_daily/game/game.dart';
 import 'package:block_daily/game/pieces.dart';
 import 'package:block_daily/main.dart';
 import 'package:block_daily/services/ad_service.dart';
+import 'package:block_daily/services/sound_service.dart';
 import 'package:block_daily/services/stats_store.dart';
 import 'package:block_daily/ui/board_view.dart';
 import 'package:block_daily/ui/game_screen.dart';
@@ -38,11 +39,13 @@ void checkerboard(Board b) {
 void main() {
   late StatsStore stats;
   late FakeAds ads;
+  late NoSound sound;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     stats = await StatsStore.open();
     ads = FakeAds();
+    sound = NoSound();
   });
 
   Future<void> pumpGame(WidgetTester tester, Game game) async {
@@ -52,6 +55,7 @@ void main() {
     await tester.pumpWidget(Services(
       stats: stats,
       ads: ads,
+      sound: sound,
       today: () => today,
       child: MaterialApp(home: GameScreen(game: game)),
     ));
@@ -108,6 +112,8 @@ void main() {
     expect(game.board.isEmpty, isTrue);
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.textContaining('+311'), findsOneWidget); // 1 + 10 + 300 perfect clear
+    expect(find.text('PERFECT!'), findsOneWidget);
+    expect(sound.played, [Sfx.pick, Sfx.perfect]);
     await tester.pump(const Duration(seconds: 1));
   });
 
@@ -148,7 +154,7 @@ void main() {
     tester.view.physicalSize = const Size(412, 880);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(BlockDailyApp(stats: stats, ads: ads, today: () => today));
+    await tester.pumpWidget(BlockDailyApp(stats: stats, ads: ads, sound: sound, today: () => today));
     expect(find.text('Daily #6'), findsOneWidget);
     expect(find.text('Same pieces for everyone today'), findsOneWidget);
 
@@ -172,5 +178,64 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Score 1 · tap to share'), findsOneWidget);
     expect(find.text('🔥 1'), findsOneWidget);
+  });
+
+  testWidgets('an unfinished classic game is saved and resumed from home', (tester) async {
+    tester.view.physicalSize = const Size(412, 880);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(BlockDailyApp(stats: stats, ads: ads, sound: sound, today: () => today));
+    expect(find.text('PLAY'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('play')));
+    await tester.pumpAndSettle();
+    var game = (tester.widget<GameScreen>(find.byType(GameScreen))).game;
+    final piece = game.tray[0]!;
+    await drag(tester, game, 0, 0, 0);
+    await tester.pumpAndSettle();
+    expect(stats.savedGame('classic'), isNotNull);
+
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('CONTINUE'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('play')));
+    await tester.pumpAndSettle();
+    game = (tester.widget<GameScreen>(find.byType(GameScreen))).game;
+    expect(game.score, piece.size);
+    expect(game.board.at(0, 0), piece.color);
+  });
+
+  testWidgets('a daily left unfinished yesterday is recorded, today starts fresh', (tester) async {
+    final yesterday = Game.daily(5)..score = 42;
+    await stats.saveGame('daily', yesterday.toJson());
+    tester.view.physicalSize = const Size(412, 880);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(BlockDailyApp(stats: stats, ads: ads, sound: sound, today: () => today));
+    await tester.tap(find.byKey(const Key('daily')));
+    await tester.pumpAndSettle();
+    expect(stats.daily(5)!.score, 42);
+    final game = (tester.widget<GameScreen>(find.byType(GameScreen))).game;
+    expect(game.dailyNumber, 6);
+    expect(game.score, 0);
+  });
+
+  testWidgets('mute toggle silences effects', (tester) async {
+    final game = Game.classic(random: Random(4));
+    await pumpGame(tester, game);
+    await tester.tap(find.byKey(const Key('mute')));
+    await tester.pump();
+    expect(sound.muted, isTrue);
+    await drag(tester, game, 0, 0, 0);
+    expect(sound.played, isEmpty);
+  });
+
+  test('praise grows with the number of lines', () {
+    expect(praiseFor(1), '');
+    expect(praiseFor(2), 'Great!');
+    expect(praiseFor(3), 'Amazing!');
+    expect(praiseFor(5), 'Unbelievable!');
+    expect(praiseFor(1, perfect: true), 'PERFECT!');
   });
 }
