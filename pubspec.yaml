@@ -93,3 +93,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# shared_preferences_android 2.5.x (Pigeon JNI) crashes release builds: R8 strips the Kotlin
+# types its JNI calls need and the package ships no keep rules. Remove once a fixed version exists.
+dependency_overrides:
+  shared_preferences_android: 2.4.28
