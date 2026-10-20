@@ -1,11 +1,11 @@
 {
-    "name": "block_daily",
-    "short_name": "block_daily",
+    "name": "Block Daily",
+    "short_name": "Block Daily",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Free block puzzle with a daily challenge, the same for everyone.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
