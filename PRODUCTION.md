@@ -25,16 +25,17 @@ Status as of 2026-10-24 (end of day). Android first; iOS needs an Apple develope
 - [ ] Add the keystore as GitHub secrets when an Android CI job is added (not before: no reason to copy the key around until then).
 
 ### 2. Create the app in Play Console (*Claude* through Chrome, *you* approve the declarations)
-- [ ] Create "Block Daily": game, free, default language English.
-- [ ] Register `ca.kallistesoft.block_daily` under **Android developer verification** if Google requires it.
+- [x] Created "Block Daily" (game, free, default language en-US); app ID 4973577989512842865.
+- [x] `ca.kallistesoft.block_daily` is registered ("Inscrite") under Android developer verification.
 
 ### 3. First upload: internal testing (*Claude*)
-- [ ] Bump the version if needed, build the signed AAB, upload it to internal testing (this enables Play App Signing).
-- [ ] Add your Gmail as an internal tester and install from Play on your Pixel.
+- [x] Release **1 (1.0.0)** uploaded and published to internal testing; Play App Signing on. Next builds: `tools/build_release.sh` (automatic build number).
+- [x] Tester list "KallisteSoft team" (jef.ottavi@gmail.com); opt-in link https://play.google.com/apps/internaltest/4701576584002610767
+- [ ] **You:** uninstall the debug build, opt in, install from Play on the Pixel ("Item not found" at first: new apps take a while to propagate).
 
 ### 4. Remove Ads product (*Claude*, after step 3)
-- [ ] Create the in-app product `remove_ads` at **$3.99 CAD** (local prices auto-converted) and activate it.
-- [ ] Add your Gmail under **License testing** (free test purchases).
+- [x] `remove_ads` created and **active**: purchase option `buy`, 3,99 CAD (2,89 USD), 174 countries/regions, backward compatible.
+- [x] License testers: the "KallisteSoft team" list (free test purchases).
 - [ ] On the Pixel: buy, then check the banner and interstitials are gone; reinstall, then Restore purchase.
 
 ### 5. Store listing and policy forms (*Claude* drafts through Chrome, *you* review)
