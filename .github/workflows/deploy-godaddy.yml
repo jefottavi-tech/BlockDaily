@@ -20,11 +20,12 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter test
-      - run: flutter build web --release
+      # The game is Android-only: play.kallistesoft.ca only serves a "coming to Google Play" page.
+      # Deploying it removes the old web build (the FTP deploy deletes files it uploaded before).
       - uses: actions/upload-artifact@v4
         with:
           name: site
-          path: build/web
+          path: web_closed
 
   deploy:
     needs: build

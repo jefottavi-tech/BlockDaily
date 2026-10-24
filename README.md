@@ -1,6 +1,6 @@
 # Block Daily
 
-Block puzzle (8×8, drag 3 pieces, clear rows and columns) for iOS, Android and web, free with ads.
+Block puzzle (8×8, drag 3 pieces, clear rows and columns) for Android (iOS later), free with ads. There is no public web version: play.kallistesoft.ca only serves the "coming to Google Play" page in `web_closed/`.
 
 - **Classic:** endless. Dealt pieces always include at least one that fits. One revive per game through a rewarded ad.
 - **Daily:** one attempt per day, and every player gets the same piece sequence, so scores are comparable and shareable ("Block Daily #42 🧩 ⭐ 3,450 🔥 combo x7"). This is the free, organic growth loop.
@@ -24,7 +24,7 @@ In the Firebase console › Remote Config, set a Number parameter to a `versionC
 
 ```sh
 flutter test              # engine, stats, share text and gameplay (drag & drop) tests
-flutter run -d chrome     # or an Android device / iOS simulator
+flutter run               # on an Android device or emulator (chrome still works for quick UI checks)
 ```
 
 Code: `lib/game/` (pure Dart engine), `lib/services/` (stats, ads, share text), `lib/ui/`.
