@@ -35,8 +35,10 @@ void main() {
     expect(formatScore(1234567), '1,234,567');
     expect(formatScore(999), '999');
     const r = DailyResult(number: 42, score: 3450, bestCombo: 7, lines: 24);
-    expect(dailyShareText(r, streak: 5), 'Block Daily #42 🧩\n⭐ 3,450\n🔥🔥🔥🔥🔥 combo x7 · 24 lines\n📅 5-day streak');
+    expect(dailyShareText(r, streak: 5), 'Block Daily #42 🧩\n⭐ 3,450\n🔥🔥🔥🔥🔥 combo x7 · 24 lines\n📅 5-day streak\n$playStoreUrl');
     expect(dailyShareText(const DailyResult(number: 1, score: 12, bestCombo: 0, lines: 0), streak: 1),
-        'Block Daily #1 🧩\n⭐ 12');
+        'Block Daily #1 🧩\n⭐ 12\n$playStoreUrl');
+    expect(classicShareText(score: 18240, newBest: true), 'Block Daily 🧩\n🏆 New best: 18,240\n$playStoreUrl');
+    expect(classicShareText(score: 950, newBest: false), 'Block Daily 🧩\n⭐ 950\n$playStoreUrl');
   });
 }

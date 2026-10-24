@@ -1,5 +1,8 @@
 import 'stats_store.dart';
 
+/// Store page, added to every shared result so friends can install the game in one tap.
+const playStoreUrl = 'https://play.google.com/store/apps/details?id=ca.kallistesoft.block_daily';
+
 String formatScore(int n) => n.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+$)'), (_) => ',');
 
 /// Text players paste into chats and social posts after the daily puzzle.
@@ -10,5 +13,13 @@ String dailyShareText(DailyResult r, {required int streak}) {
     '⭐ ${formatScore(r.score)}',
     if (r.bestCombo > 0) '$fire combo x${r.bestCombo} · ${r.lines} lines',
     if (streak > 1) '📅 $streak-day streak',
+    playStoreUrl,
   ].join('\n');
 }
+
+/// Text shared after a classic game.
+String classicShareText({required int score, required bool newBest}) => [
+      'Block Daily 🧩',
+      newBest ? '🏆 New best: ${formatScore(score)}' : '⭐ ${formatScore(score)}',
+      playStoreUrl,
+    ].join('\n');
