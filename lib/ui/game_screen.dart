@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../game/board.dart';
 import '../game/game.dart';
+import '../l10n/app_localizations.dart';
 import '../services/ad_service.dart';
 import '../services/share_text.dart';
 import '../services/sound_service.dart';
@@ -51,6 +52,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   late StatsStore _stats;
   late AdService _ads;
   late SoundService _sound;
+  late AppLocalizations _l10n;
 
   bool get _isDaily => game.mode == GameMode.daily;
   bool get _canRevive => !_isDaily && !game.revived;
@@ -62,6 +64,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _stats = services.stats;
     _ads = services.ads;
     _sound = services.sound;
+    _l10n = AppLocalizations.of(context);
   }
 
   @override
@@ -138,10 +141,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       _particles = Particle.burst(flash, lines: lines, seed: game.score);
       _shake = move.perfect ? 10 : (lines >= 2 ? 3.0 + lines * 2 : 0);
       _clearAnim.forward(from: 0);
-      _praise = praiseFor(lines, perfect: move.perfect);
+      _praise = praiseFor(lines, _l10n, perfect: move.perfect);
       _popup = [
         '+${move.points}',
-        if (move.combo > 1) 'Combo x${move.combo}',
+        if (move.combo > 1) _l10n.combo(move.combo),
       ].join('  ');
       _popupAnim.forward(from: 0);
     }
@@ -180,7 +183,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   Future<void> _revive() async {
     final messenger = ScaffoldMessenger.of(context);
     if (!await _ads.showRewarded()) {
-      messenger.showSnackBar(const SnackBar(content: Text('No ad available right now. Try again in a moment.')));
+      messenger.showSnackBar(SnackBar(content: Text(_l10n.noAdAvailable)));
       return;
     }
     setState(() {
@@ -208,12 +211,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
   Future<void> _share() async {
     if (!_isDaily) {
-      await shareText(context, classicShareText(score: game.score, newBest: _newBest));
+      await shareText(context, classicShareText(score: game.score, newBest: _newBest, l10n: _l10n));
       return;
     }
     final result = _stats.daily(game.dailyNumber!);
     if (result == null) return;
-    await shareText(context, dailyShareText(result, streak: _stats.dailyStreak(game.dailyNumber!)));
+    await shareText(context, dailyShareText(result, streak: _stats.dailyStreak(game.dailyNumber!), l10n: _l10n));
   }
 
   // ---- layout ----
@@ -238,7 +241,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               Column(
                 children: [
                   _TopBar(
-                    title: _isDaily ? 'Daily #${game.dailyNumber}' : null,
+                    title: _isDaily ? _l10n.dailyTitle(game.dailyNumber!) : null,
                     score: game.score,
                     best: max(stats.bestScore, _isDaily ? 0 : game.score),
                     showBest: !_isDaily,
@@ -383,6 +386,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 4, 16, 0),
       child: Column(children: [
@@ -399,19 +403,20 @@ class _TopBar extends StatelessWidget {
           if (showBest) ...[
             const Icon(Icons.emoji_events_rounded, color: accent, size: 22),
             const SizedBox(width: 4),
-            Text(formatScore(best),
+            Text(formatScore(best, locale: l10n.localeName),
                 key: const Key('best'), style: const TextStyle(color: accent, fontWeight: FontWeight.w800, fontSize: 18)),
           ],
         ]),
         Text(
-          formatScore(score),
+          formatScore(score, locale: l10n.localeName),
           key: const Key('score'),
           style: const TextStyle(color: Colors.white, fontSize: 44, fontWeight: FontWeight.w900),
         ),
         SizedBox(
           height: 22,
           child: combo > 1
-              ? Text('🔥 Combo x$combo', style: const TextStyle(color: Color(0xFFFF8A3D), fontWeight: FontWeight.w800))
+              ? Text('🔥 ${l10n.combo(combo)}',
+                  style: const TextStyle(color: Color(0xFFFF8A3D), fontWeight: FontWeight.w800))
               : null,
         ),
       ]),
@@ -444,6 +449,7 @@ class _GameOverPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final big = FilledButton.styleFrom(
       backgroundColor: accent,
       foregroundColor: background,
@@ -462,16 +468,16 @@ class _GameOverPanel extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(daily ? 'Daily complete!' : 'No more space',
+              Text(daily ? l10n.dailyComplete : l10n.noMoreSpace,
                   style: const TextStyle(color: Colors.white70, fontSize: 20, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
-              Text(formatScore(score),
+              Text(formatScore(score, locale: l10n.localeName),
                   key: const Key('finalScore'),
                   style: const TextStyle(color: Colors.white, fontSize: 56, fontWeight: FontWeight.w900)),
               if (newBest)
-                const Text('🏆 New best!', style: TextStyle(color: accent, fontSize: 20, fontWeight: FontWeight.w800))
+                Text(l10n.newBest, style: const TextStyle(color: accent, fontSize: 20, fontWeight: FontWeight.w800))
               else if (!daily)
-                Text('Best ${formatScore(best)}', style: const TextStyle(color: accent, fontSize: 16)),
+                Text(l10n.bestScore(formatScore(best, locale: l10n.localeName)), style: const TextStyle(color: accent, fontSize: 16)),
               const SizedBox(height: 28),
               if (canRevive) ...[
                 FilledButton.icon(
@@ -479,7 +485,7 @@ class _GameOverPanel extends StatelessWidget {
                   style: big,
                   onPressed: onRevive,
                   icon: const Icon(Icons.play_circle_fill_rounded),
-                  label: const Text('Continue  ▶ ad'),
+                  label: Text(l10n.reviveWithAd),
                 ),
                 const SizedBox(height: 12),
               ],
@@ -489,21 +495,21 @@ class _GameOverPanel extends StatelessWidget {
                   style: big,
                   onPressed: onShare,
                   icon: const Icon(Icons.ios_share_rounded),
-                  label: const Text('Share result'),
+                  label: Text(l10n.shareResult),
                 )
               else ...[
-                OutlinedButton(key: const Key('again'), style: small, onPressed: onPlayAgain, child: const Text('Play again')),
+                OutlinedButton(key: const Key('again'), style: small, onPressed: onPlayAgain, child: Text(l10n.playAgain)),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
                   key: const Key('share'),
                   style: small,
                   onPressed: onShare,
                   icon: const Icon(Icons.ios_share_rounded),
-                  label: const Text('Share score'),
+                  label: Text(l10n.shareScore),
                 ),
               ],
               const SizedBox(height: 12),
-              OutlinedButton(key: const Key('home'), style: small, onPressed: onHome, child: const Text('Home')),
+              OutlinedButton(key: const Key('home'), style: small, onPressed: onHome, child: Text(l10n.home)),
             ]),
           ),
         ),
@@ -513,13 +519,13 @@ class _GameOverPanel extends StatelessWidget {
 }
 
 /// Callout for a clear; single lines get none so the big ones feel special.
-String praiseFor(int lines, {bool perfect = false}) {
-  if (perfect) return 'PERFECT!';
+String praiseFor(int lines, AppLocalizations l10n, {bool perfect = false}) {
+  if (perfect) return l10n.praisePerfect;
   return switch (lines) {
     <= 1 => '',
-    2 => 'Great!',
-    3 => 'Amazing!',
-    _ => 'Unbelievable!',
+    2 => l10n.praiseGreat,
+    3 => l10n.praiseAmazing,
+    _ => l10n.praiseUnbelievable,
   };
 }
 

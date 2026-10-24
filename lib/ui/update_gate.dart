@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../services/update_service.dart';
 import 'palette.dart';
 
@@ -43,20 +44,21 @@ class _UpdateGateState extends State<UpdateGate> {
   void _offer() {
     final navigator = widget.navigatorKey.currentState;
     if (navigator == null) return;
+    final l10n = AppLocalizations.of(navigator.context);
     showDialog<void>(
       context: navigator.context,
       builder: (context) => AlertDialog(
-        title: const Text('Update available'),
-        content: const Text('A new version of Block Daily is ready.'),
+        title: Text(l10n.updateAvailableTitle),
+        content: Text(l10n.updateAvailableBody),
         actions: [
-          TextButton(key: const Key('updateLater'), onPressed: () => Navigator.pop(context), child: const Text('Later')),
+          TextButton(key: const Key('updateLater'), onPressed: () => Navigator.pop(context), child: Text(l10n.updateLater)),
           FilledButton(
             key: const Key('updateNow'),
             onPressed: () {
               Navigator.pop(context);
               widget.onUpdate();
             },
-            child: const Text('Update'),
+            child: Text(l10n.updateNow),
           ),
         ],
       ),
@@ -70,38 +72,40 @@ class _Required extends StatelessWidget {
   final VoidCallback onUpdate;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        key: const Key('updateRequired'),
-        backgroundColor: background,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Icon(Icons.system_update_rounded, color: accent, size: 72),
-              const SizedBox(height: 24),
-              const Text('Update required',
-                  style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 12),
-              const Text(
-                'This version of Block Daily is no longer supported. Update to keep playing, so your daily puzzle '
-                'matches everyone else\'s.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      key: const Key('updateRequired'),
+      backgroundColor: background,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Icon(Icons.system_update_rounded, color: accent, size: 72),
+            const SizedBox(height: 24),
+            Text(l10n.updateRequiredTitle,
+                style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 12),
+            Text(
+              l10n.updateRequiredBody,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+            const SizedBox(height: 32),
+            FilledButton(
+              key: const Key('updateRequiredButton'),
+              style: FilledButton.styleFrom(
+                backgroundColor: accent,
+                foregroundColor: background,
+                minimumSize: const Size.fromHeight(56),
+                textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
               ),
-              const SizedBox(height: 32),
-              FilledButton(
-                key: const Key('updateRequiredButton'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: accent,
-                  foregroundColor: background,
-                  minimumSize: const Size.fromHeight(56),
-                  textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-                ),
-                onPressed: onUpdate,
-                child: const Text('UPDATE'),
-              ),
-            ]),
-          ),
+              onPressed: onUpdate,
+              child: Text(l10n.updateRequiredButton),
+            ),
+          ]),
         ),
-      );
+      ),
+    );
+  }
 }
