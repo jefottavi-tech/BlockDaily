@@ -1,0 +1,14 @@
+# App icons for every platform, from tools/make_icon.py.
+# Regenerate: dart pub global activate flutter_launcher_icons && dart pub global run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/icon/icon.png"
+  android: "ic_launcher"
+  adaptive_icon_background: "#16213E"
+  adaptive_icon_foreground: "assets/icon/foreground.png"
+  ios: true
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#16213E"
+    theme_color: "#16213E"
