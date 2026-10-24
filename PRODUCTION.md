@@ -20,9 +20,9 @@ Status as of 2026-10-24 (end of day). Android first; iOS needs an Apple develope
 ## Remaining
 
 ### 1. Release signing (*Claude*, then *you* back it up)
-- [ ] Create the upload keystore and wire it into the release build (`key.properties`, kept out of git). Release builds are still signed with the debug key.
+- [x] Upload key created (`~/Keys/kallistesoft/block-daily-upload.jks`, RSA 4096, alias `upload`, SHA-256 `B1:88:E5:…:22:07:A7`) and wired into release builds through `android/key.properties` (git-ignored).
 - [ ] **You:** back up the keystore file and its password (password manager plus a copy off this Mac). Losing it means you can no longer update the app.
-- [ ] Add the keystore as GitHub secrets for a future Android CI job.
+- [ ] Add the keystore as GitHub secrets when an Android CI job is added (not before: no reason to copy the key around until then).
 
 ### 2. Create the app in Play Console (*Claude* through Chrome, *you* approve the declarations)
 - [ ] Create "Block Daily": game, free, default language English.

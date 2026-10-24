@@ -28,3 +28,7 @@ flutter run               # on an Android device or emulator (chrome still works
 ```
 
 Code: `lib/game/` (pure Dart engine), `lib/services/` (stats, ads, share text), `lib/ui/`.
+
+## Release signing
+
+Release builds are signed with the Google Play **upload key** `~/Keys/kallistesoft/block-daily-upload.jks` (alias `upload`), configured through `android/key.properties` (git-ignored; a copy sits next to the key). Without that file, release builds fall back to the debug key and can't be uploaded to Play. Keep both files backed up: losing them means asking Google to reset the upload key.
