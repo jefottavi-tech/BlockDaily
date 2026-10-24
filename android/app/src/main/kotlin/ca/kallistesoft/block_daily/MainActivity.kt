@@ -1,4 +1,4 @@
-package ca.blockdaily.block_daily
+package ca.kallistesoft.block_daily
 
 import io.flutter.embedding.android.FlutterActivity
 
