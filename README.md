@@ -32,3 +32,5 @@ Code: `lib/game/` (pure Dart engine), `lib/services/` (stats, ads, share text), 
 ## Release signing
 
 Release builds are signed with the Google Play **upload key** `~/Keys/kallistesoft/block-daily-upload.jks` (alias `upload`), configured through `android/key.properties` (git-ignored; a copy sits next to the key). Without that file, release builds fall back to the debug key and can't be uploaded to Play. Keep both files backed up: losing them means asking Google to reset the upload key.
+
+To build a bundle for Play, run `tools/build_release.sh` on an up-to-date `main`. The build number (versionCode) is the commit count, so each upload is higher than the last; bump the version name in `pubspec.yaml` yourself (1.0.1 for a fix, 1.1.0 for features).
