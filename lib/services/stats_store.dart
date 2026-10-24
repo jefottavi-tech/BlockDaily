@@ -62,6 +62,19 @@ class StatsStore {
     return streak;
   }
 
+  /// First launch on this device; stored on the first call.
+  DateTime firstLaunch() {
+    final ms = _prefs.getInt('firstLaunch');
+    if (ms != null) return DateTime.fromMillisecondsSinceEpoch(ms);
+    final now = DateTime.now();
+    _prefs.setInt('firstLaunch', now.millisecondsSinceEpoch);
+    return now;
+  }
+
+  /// "Remove Ads" bought; cached so it holds offline.
+  bool get premium => _prefs.getBool('premium') ?? false;
+  Future<void> setPremium(bool value) => _prefs.setBool('premium', value);
+
   bool get muted => _prefs.getBool('muted') ?? false;
   Future<void> setMuted(bool value) => _prefs.setBool('muted', value);
 

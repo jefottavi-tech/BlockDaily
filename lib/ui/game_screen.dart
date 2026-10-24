@@ -9,6 +9,7 @@ import '../services/ad_service.dart';
 import '../services/share_text.dart';
 import '../services/sound_service.dart';
 import '../services/stats_store.dart';
+import 'banner_slot.dart';
 import 'board_view.dart';
 import 'palette.dart';
 import 'services.dart';
@@ -177,7 +178,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _revive() async {
-    if (!await _ads.showRewarded()) return;
+    final messenger = ScaffoldMessenger.of(context);
+    if (!await _ads.showRewarded()) {
+      messenger.showSnackBar(const SnackBar(content: Text('No ad available right now. Try again in a moment.')));
+      return;
+    }
     setState(() {
       game.revive();
       _over = false;
@@ -291,7 +296,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         ),
                     ]),
                   ),
-                  const SizedBox(height: 56), // reserved for the banner ad
+                  const BannerSlot(),
                 ],
               ),
               // Praise and points over the board.

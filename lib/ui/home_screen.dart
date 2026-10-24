@@ -7,6 +7,7 @@ import '../services/stats_store.dart';
 import 'board_view.dart';
 import 'game_screen.dart';
 import 'palette.dart';
+import 'remove_ads.dart';
 import 'services.dart';
 import 'share.dart';
 
@@ -102,6 +103,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(color: Colors.white54),
                 ),
                 const SizedBox(height: 8),
+                RemoveAdsButtons(premium: services.premium),
+                if (services.privacyOptionsRequired != null)
+                  ValueListenableBuilder(
+                    valueListenable: services.privacyOptionsRequired!,
+                    builder: (_, required, _) => required
+                        ? TextButton(
+                            key: const Key('privacy'),
+                            onPressed: services.showPrivacyOptions,
+                            child: const Text('Privacy options', style: TextStyle(color: Colors.white38)),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
               ]),
             ),
           ),
