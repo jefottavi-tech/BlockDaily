@@ -7,9 +7,11 @@ import 'services/admob_ad_service.dart';
 import 'services/premium_service.dart';
 import 'services/sound_service.dart';
 import 'services/stats_store.dart';
+import 'services/update_service.dart';
 import 'ui/home_screen.dart';
 import 'ui/palette.dart';
 import 'ui/services.dart';
+import 'ui/update_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,7 @@ Future<void> main() async {
   WidgetBuilder? banner;
   ValueListenable<bool>? privacyOptionsRequired;
   VoidCallback? showPrivacyOptions;
+  UpdateService? updates;
   if (mobile) {
     final admob = AdMobAdService();
     final store = StorePremiumService(stats);
@@ -32,8 +35,10 @@ Future<void> main() async {
     banner = (_) => admob.banner();
     privacyOptionsRequired = admob.privacyOptionsRequired;
     showPrivacyOptions = admob.showPrivacyOptions;
+    updates = UpdateService();
     admob.init();
     store.init();
+    updates.check();
   }
 
   runApp(BlockDailyApp(
@@ -43,6 +48,8 @@ Future<void> main() async {
     banner: banner,
     privacyOptionsRequired: privacyOptionsRequired,
     showPrivacyOptions: showPrivacyOptions,
+    updateStatus: updates?.status,
+    onUpdate: updates?.update,
     sound: AudioSoundService(muted: stats.muted, persist: stats.setMuted),
   ));
 }
@@ -57,6 +64,8 @@ class BlockDailyApp extends StatelessWidget {
     this.banner,
     this.privacyOptionsRequired,
     this.showPrivacyOptions,
+    this.updateStatus,
+    this.onUpdate,
     this.today = DateTime.now,
   });
 
@@ -67,6 +76,10 @@ class BlockDailyApp extends StatelessWidget {
   final WidgetBuilder? banner;
   final ValueListenable<bool>? privacyOptionsRequired;
   final VoidCallback? showPrivacyOptions;
+
+  /// Force / recommended update from Remote Config; null where it isn't wired (web, tests).
+  final ValueListenable<UpdateStatus>? updateStatus;
+  final VoidCallback? onUpdate;
   final DateTime Function() today;
 
   @override
@@ -89,8 +102,14 @@ class BlockDailyApp extends StatelessWidget {
           colorSchemeSeed: accent,
           scaffoldBackgroundColor: background,
         ),
+        navigatorKey: _navigator,
+        builder: (context, child) => updateStatus == null
+            ? child!
+            : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
         home: const HomeScreen(),
       ),
     );
   }
+
+  static final _navigator = GlobalKey<NavigatorState>();
 }
