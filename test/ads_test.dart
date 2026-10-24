@@ -104,12 +104,17 @@ void main() {
       stats = await StatsStore.open();
     });
 
-    Future<void> pumpHome(WidgetTester tester, PremiumService premium) async {
+    Future<void> pumpHome(WidgetTester tester, PremiumService premium, {Locale? locale}) async {
       tester.view.physicalSize = const Size(412, 880);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(BlockDailyApp(
-          stats: stats, ads: CountingAds(), sound: NoSound(), premium: premium, today: () => DateTime(2026, 10, 25)));
+          stats: stats,
+          ads: CountingAds(),
+          sound: NoSound(),
+          premium: premium,
+          today: () => DateTime(2026, 10, 25),
+          locale: locale));
     }
 
     testWidgets('No ads is hidden when the store has no product', (tester) async {
@@ -127,6 +132,19 @@ void main() {
       await tester.tap(find.byKey(const Key('parentOk')));
       await tester.pumpAndSettle();
       expect(premium.buys, 0);
+    });
+
+    testWidgets('No ads offer and grown-up check in French', (tester) async {
+      final premium = FakePremium();
+      await pumpHome(tester, premium, locale: const Locale('fr'));
+      expect(find.textContaining('Sans pub · '), findsOneWidget);
+      expect(find.text('Restaurer l’achat'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('removeAds')));
+      await tester.pumpAndSettle();
+      expect(find.text('Demande à un adulte'), findsOneWidget);
+      expect(find.textContaining('Pour continuer, entre la réponse à '), findsOneWidget);
+      expect(find.text('Annuler'), findsOneWidget);
+      expect(find.text('Continuer'), findsOneWidget);
     });
 
     testWidgets('the right answer buys and hides the offer', (tester) async {

@@ -1,0 +1,113 @@
+{
+  "@@locale": "en",
+
+  "play": "PLAY",
+  "@play": {"description": "Home: main button starting a classic game"},
+  "continueGame": "CONTINUE",
+  "@continueGame": {"description": "Home: main button when a classic game is saved"},
+  "dailyTitle": "Daily #{number}",
+  "@dailyTitle": {
+    "description": "Daily puzzle name, on the home card and the game screen",
+    "placeholders": {"number": {"type": "int"}}
+  },
+  "dailyNotPlayed": "Same pieces for everyone today",
+  "@dailyNotPlayed": {"description": "Home daily card subtitle before playing"},
+  "dailyPlayed": "Score {score} · tap to share",
+  "@dailyPlayed": {
+    "description": "Home daily card subtitle once played; score is already formatted",
+    "placeholders": {"score": {"type": "String"}}
+  },
+  "instructions": "Drag blocks onto the board. Fill rows or columns to clear them.",
+  "@instructions": {"description": "Home: how to play"},
+  "privacyOptions": "Privacy options",
+  "@privacyOptions": {"description": "Home: opens the ad consent form"},
+
+  "noAdsPrice": "No ads · {price}",
+  "@noAdsPrice": {
+    "description": "Remove ads purchase button; price comes localized from the store",
+    "placeholders": {"price": {"type": "String"}}
+  },
+  "restorePurchase": "Restore purchase",
+  "@restorePurchase": {},
+  "parentGateTitle": "Ask a grown-up",
+  "@parentGateTitle": {"description": "Parental gate before a purchase; addresses a child"},
+  "parentGateQuestion": "To continue, enter the answer to {a} × {b}",
+  "@parentGateQuestion": {
+    "description": "Parental gate multiplication; addresses a child",
+    "placeholders": {"a": {"type": "int"}, "b": {"type": "int"}}
+  },
+  "cancel": "Cancel",
+  "@cancel": {},
+  "continueAction": "Continue",
+  "@continueAction": {"description": "Dialog confirm button"},
+
+  "updateAvailableTitle": "Update available",
+  "@updateAvailableTitle": {},
+  "updateAvailableBody": "A new version of Block Daily is ready.",
+  "@updateAvailableBody": {},
+  "updateLater": "Later",
+  "@updateLater": {},
+  "updateNow": "Update",
+  "@updateNow": {},
+  "updateRequiredTitle": "Update required",
+  "@updateRequiredTitle": {},
+  "updateRequiredBody": "This version of Block Daily is no longer supported. Update to keep playing, so your daily puzzle matches everyone else's.",
+  "@updateRequiredBody": {},
+  "updateRequiredButton": "UPDATE",
+  "@updateRequiredButton": {},
+
+  "noMoreSpace": "No more space",
+  "@noMoreSpace": {"description": "Classic game over title"},
+  "dailyComplete": "Daily complete!",
+  "@dailyComplete": {"description": "Daily game over title"},
+  "newBest": "🏆 New best!",
+  "@newBest": {},
+  "bestScore": "Best {score}",
+  "@bestScore": {
+    "description": "Game over: best classic score; score is already formatted",
+    "placeholders": {"score": {"type": "String"}}
+  },
+  "reviveWithAd": "Continue  ▶ ad",
+  "@reviveWithAd": {"description": "Game over: continue after watching a rewarded ad"},
+  "playAgain": "Play again",
+  "@playAgain": {},
+  "home": "Home",
+  "@home": {"description": "Game over: back to the home screen"},
+  "shareResult": "Share result",
+  "@shareResult": {"description": "Daily game over share button"},
+  "shareScore": "Share score",
+  "@shareScore": {"description": "Classic game over share button"},
+  "noAdAvailable": "No ad available right now. Try again in a moment.",
+  "@noAdAvailable": {},
+  "praiseGreat": "Great!",
+  "@praiseGreat": {"description": "Callout for clearing 2 lines at once"},
+  "praiseAmazing": "Amazing!",
+  "@praiseAmazing": {"description": "Callout for clearing 3 lines at once"},
+  "praiseUnbelievable": "Unbelievable!",
+  "@praiseUnbelievable": {"description": "Callout for clearing 4+ lines at once"},
+  "praisePerfect": "PERFECT!",
+  "@praisePerfect": {"description": "Callout for clearing the whole board"},
+  "combo": "Combo x{count}",
+  "@combo": {
+    "description": "Consecutive clears counter",
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "shareCopied": "Result copied — paste it anywhere!",
+  "@shareCopied": {"description": "Snackbar when sharing falls back to the clipboard"},
+  "shareLines": "{count, plural, one{{count} line} other{{count} lines}}",
+  "@shareLines": {
+    "description": "Shared text: lines cleared in the daily",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "shareStreak": "{count, plural, one{📅 {count}-day streak} other{📅 {count}-day streak}}",
+  "@shareStreak": {
+    "description": "Shared text: consecutive days played",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "shareNewBest": "🏆 New best: {score}",
+  "@shareNewBest": {
+    "description": "Shared text after a classic record; score is already formatted",
+    "placeholders": {"score": {"type": "String"}}
+  }
+}

@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'l10n/app_localizations.dart';
+
 import 'services/ad_service.dart';
 import 'services/admob_ad_service.dart';
 import 'services/crash_reporting.dart';
@@ -73,6 +75,7 @@ class BlockDailyApp extends StatelessWidget {
     this.updateStatus,
     this.onUpdate,
     this.today = DateTime.now,
+    this.locale,
   });
 
   final StatsStore stats;
@@ -88,6 +91,9 @@ class BlockDailyApp extends StatelessWidget {
   final VoidCallback? onUpdate;
   final DateTime Function() today;
 
+  /// Forces a language (tests); null follows the phone, falling back to English.
+  final Locale? locale;
+
   @override
   Widget build(BuildContext context) {
     return Services(
@@ -102,6 +108,9 @@ class BlockDailyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Block Daily',
         debugShowCheckedModeBanner: false,
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           useMaterial3: true,
           brightness: Brightness.dark,

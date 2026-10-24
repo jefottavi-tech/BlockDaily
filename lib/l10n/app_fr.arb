@@ -1,0 +1,47 @@
+{
+  "@@locale": "fr",
+
+  "play": "JOUER",
+  "continueGame": "CONTINUER",
+  "dailyTitle": "Défi #{number}",
+  "dailyNotPlayed": "Les mêmes pièces pour tous aujourd’hui",
+  "dailyPlayed": "Score {score} · touchez pour partager",
+  "instructions": "Glissez les blocs sur la grille. Remplissez des lignes ou des colonnes pour les effacer.",
+  "privacyOptions": "Options de confidentialité",
+
+  "noAdsPrice": "Sans pub · {price}",
+  "restorePurchase": "Restaurer l’achat",
+  "parentGateTitle": "Demande à un adulte",
+  "parentGateQuestion": "Pour continuer, entre la réponse à {a} × {b}",
+  "cancel": "Annuler",
+  "continueAction": "Continuer",
+
+  "updateAvailableTitle": "Mise à jour disponible",
+  "updateAvailableBody": "Une nouvelle version de Block Daily est prête.",
+  "updateLater": "Plus tard",
+  "updateNow": "Mettre à jour",
+  "updateRequiredTitle": "Mise à jour requise",
+  "updateRequiredBody": "Cette version de Block Daily n’est plus prise en charge. Mettez-la à jour pour continuer à jouer avec le même défi du jour que tout le monde.",
+  "updateRequiredButton": "METTRE À JOUR",
+
+  "noMoreSpace": "Plus de place",
+  "dailyComplete": "Défi du jour terminé !",
+  "newBest": "🏆 Nouveau record !",
+  "bestScore": "Record {score}",
+  "reviveWithAd": "Continuer  ▶ pub",
+  "playAgain": "Rejouer",
+  "home": "Accueil",
+  "shareResult": "Partager le résultat",
+  "shareScore": "Partager le score",
+  "noAdAvailable": "Aucune pub disponible pour le moment. Réessayez dans un instant.",
+  "praiseGreat": "Bravo !",
+  "praiseAmazing": "Génial !",
+  "praiseUnbelievable": "Incroyable !",
+  "praisePerfect": "PARFAIT !",
+  "combo": "Combo x{count}",
+
+  "shareCopied": "Résultat copié — collez-le où vous voulez !",
+  "shareLines": "{count, plural, one{{count} ligne} other{{count} lignes}}",
+  "shareStreak": "{count, plural, one{📅 Série de {count} jour} other{📅 Série de {count} jours}}",
+  "shareNewBest": "🏆 Nouveau record : {score}"
+}

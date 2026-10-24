@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:block_daily/game/board.dart';
 import 'package:block_daily/game/game.dart';
 import 'package:block_daily/game/pieces.dart';
+import 'package:block_daily/l10n/app_localizations.dart';
 import 'package:block_daily/main.dart';
 import 'package:block_daily/services/ad_service.dart';
 import 'package:block_daily/services/sound_service.dart';
@@ -48,7 +49,7 @@ void main() {
     sound = NoSound();
   });
 
-  Future<void> pumpGame(WidgetTester tester, Game game) async {
+  Future<void> pumpGame(WidgetTester tester, Game game, {Locale? locale}) async {
     tester.view.physicalSize = const Size(412, 880);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -57,7 +58,12 @@ void main() {
       ads: ads,
       sound: sound,
       today: () => today,
-      child: MaterialApp(home: GameScreen(game: game)),
+      child: MaterialApp(
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: GameScreen(game: game),
+      ),
     ));
   }
 
@@ -236,10 +242,77 @@ void main() {
   });
 
   test('praise grows with the number of lines', () {
-    expect(praiseFor(1), '');
-    expect(praiseFor(2), 'Great!');
-    expect(praiseFor(3), 'Amazing!');
-    expect(praiseFor(5), 'Unbelievable!');
-    expect(praiseFor(1, perfect: true), 'PERFECT!');
+    final en = lookupAppLocalizations(const Locale('en'));
+    expect(praiseFor(1, en), '');
+    expect(praiseFor(2, en), 'Great!');
+    expect(praiseFor(3, en), 'Amazing!');
+    expect(praiseFor(5, en), 'Unbelievable!');
+    expect(praiseFor(1, en, perfect: true), 'PERFECT!');
+  });
+
+  test('praise in French', () {
+    final fr = lookupAppLocalizations(const Locale('fr'));
+    expect(praiseFor(1, fr), '');
+    expect(praiseFor(2, fr), 'Bravo\u00A0!');
+    expect(praiseFor(3, fr), 'Génial\u00A0!');
+    expect(praiseFor(5, fr), 'Incroyable\u00A0!');
+    expect(praiseFor(1, fr, perfect: true), 'PARFAIT\u00A0!');
+  });
+
+  group('French', () {
+    const fr = Locale('fr');
+
+    testWidgets('home screen', (tester) async {
+      tester.view.physicalSize = const Size(412, 880);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await stats.recordClassic(18240);
+      await tester.pumpWidget(BlockDailyApp(stats: stats, ads: ads, sound: sound, today: () => today, locale: fr));
+      expect(find.text('JOUER'), findsOneWidget);
+      expect(find.text('Défi #6'), findsOneWidget);
+      expect(find.text('Les mêmes pièces pour tous aujourd’hui'), findsOneWidget);
+      expect(find.text('Glissez les blocs sur la grille. Remplissez des lignes ou des colonnes pour les effacer.'),
+          findsOneWidget);
+      expect(find.text('18\u202F240'), findsOneWidget);
+    });
+
+    testWidgets('perfect clear callout', (tester) async {
+      final game = Game.classic(random: Random(4));
+      for (var c = 0; c < 7; c++) {
+        game.board.cells[7 * Board.size + c] = 3;
+      }
+      game.tray[0] = piecesById['dot'];
+      await pumpGame(tester, game, locale: fr);
+      await drag(tester, game, 0, 7, 7);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.text('PARFAIT\u00A0!'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+    });
+
+    testWidgets('classic game over', (tester) async {
+      final game = Game.classic(random: Random(4));
+      checkerboard(game.board);
+      game.tray.setAll(0, [piecesById['dot'], piecesById['o2'], piecesById['o2']]);
+      await pumpGame(tester, game, locale: fr);
+      await drag(tester, game, 0, 0, 1);
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Plus de place'), findsOneWidget);
+      expect(find.text('Continuer  ▶ pub'), findsOneWidget);
+      expect(find.text('Rejouer'), findsOneWidget);
+      expect(find.text('Partager le score'), findsOneWidget);
+      expect(find.text('Accueil'), findsOneWidget);
+    });
+
+    testWidgets('daily game over', (tester) async {
+      final game = Game.daily(6);
+      checkerboard(game.board);
+      game.tray.setAll(0, [piecesById['dot'], piecesById['o2'], piecesById['o2']]);
+      await pumpGame(tester, game, locale: fr);
+      expect(find.text('Défi #6'), findsOneWidget);
+      await drag(tester, game, 0, 0, 1);
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Défi du jour terminé\u00A0!'), findsOneWidget);
+      expect(find.text('Partager le résultat'), findsOneWidget);
+    });
   });
 }

@@ -28,7 +28,7 @@ void main() {
       updates = 0;
     });
 
-    Future<void> pumpApp(WidgetTester tester) async {
+    Future<void> pumpApp(WidgetTester tester, {Locale? locale}) async {
       tester.view.physicalSize = const Size(412, 880);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -39,8 +39,24 @@ void main() {
         updateStatus: status,
         onUpdate: () => updates++,
         today: () => DateTime(2026, 10, 25),
+        locale: locale,
       ));
     }
+
+    testWidgets('update prompts in French', (tester) async {
+      await pumpApp(tester, locale: const Locale('fr'));
+      status.value = UpdateStatus.recommended;
+      await tester.pumpAndSettle();
+      expect(find.text('Mise à jour disponible'), findsOneWidget);
+      expect(find.text('Plus tard'), findsOneWidget);
+      expect(find.text('Mettre à jour'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('updateLater')));
+      await tester.pumpAndSettle();
+      status.value = UpdateStatus.required;
+      await tester.pump();
+      expect(find.text('Mise à jour requise'), findsOneWidget);
+      expect(find.text('METTRE À JOUR'), findsOneWidget);
+    });
 
     testWidgets('required update blocks the game', (tester) async {
       await pumpApp(tester);

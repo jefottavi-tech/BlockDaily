@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../game/game.dart';
 import '../game/pieces.dart';
+import '../l10n/app_localizations.dart';
 import '../services/share_text.dart';
 import '../services/stats_store.dart';
 import 'board_view.dart';
@@ -50,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final today = dailyNumberFor(services.today());
     final daily = stats.daily(today);
     final streak = stats.dailyStreak(today);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: background,
@@ -69,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   const Icon(Icons.emoji_events_rounded, color: accent),
                   const SizedBox(width: 6),
-                  Text(formatScore(stats.bestScore),
+                  Text(formatScore(stats.bestScore, locale: l10n.localeName),
                       key: const Key('homeBest'),
                       style: const TextStyle(color: accent, fontSize: 20, fontWeight: FontWeight.w800)),
                 ]),
@@ -84,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
                   ),
                   onPressed: () => _open(_classic(stats)),
-                  child: Text(stats.savedGame(GameMode.classic.name) == null ? 'PLAY' : 'CONTINUE'),
+                  child: Text(stats.savedGame(GameMode.classic.name) == null ? l10n.play : l10n.continueGame),
                 ),
                 const SizedBox(height: 16),
                 _DailyCard(
@@ -94,13 +96,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPlay: () async => _open(await _daily(stats, today)),
                   onShare: daily == null
                       ? null
-                      : () => shareText(context, dailyShareText(daily, streak: streak)),
+                      : () => shareText(context, dailyShareText(daily, streak: streak, l10n: l10n)),
                 ),
                 const Spacer(),
-                const Text(
-                  'Drag blocks onto the board. Fill rows or columns to clear them.',
+                Text(
+                  l10n.instructions,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white54),
+                  style: const TextStyle(color: Colors.white54),
                 ),
                 const SizedBox(height: 8),
                 RemoveAdsButtons(premium: services.premium),
@@ -111,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? TextButton(
                             key: const Key('privacy'),
                             onPressed: services.showPrivacyOptions,
-                            child: const Text('Privacy options', style: TextStyle(color: Colors.white38)),
+                            child: Text(l10n.privacyOptions, style: const TextStyle(color: Colors.white38)),
                           )
                         : const SizedBox.shrink(),
                   ),
@@ -136,6 +138,7 @@ class _DailyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final played = score != null;
+    final l10n = AppLocalizations.of(context);
     return Material(
       color: const Color(0xFF243B6B),
       borderRadius: BorderRadius.circular(20),
@@ -150,11 +153,11 @@ class _DailyCard extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Daily #$number',
+                Text(l10n.dailyTitle(number),
                     style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 2),
                 Text(
-                  played ? 'Score ${formatScore(score!)} · tap to share' : 'Same pieces for everyone today',
+                  played ? l10n.dailyPlayed(formatScore(score!, locale: l10n.localeName)) : l10n.dailyNotPlayed,
                   style: const TextStyle(color: Colors.white70),
                 ),
               ]),

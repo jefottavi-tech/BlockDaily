@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../services/premium_service.dart';
 import 'palette.dart';
 
@@ -21,17 +22,18 @@ class RemoveAdsButtons extends StatelessWidget {
         listenable: premium,
         builder: (context, _) {
           if (!premium.available) return const SizedBox.shrink();
+          final l10n = AppLocalizations.of(context);
           return Wrap(alignment: WrapAlignment.center, children: [
             TextButton.icon(
               key: const Key('removeAds'),
               onPressed: () => _buy(context),
               icon: const Icon(Icons.block_rounded, color: accent),
-              label: Text('No ads · ${premium.price ?? ''}', style: const TextStyle(color: accent)),
+              label: Text(l10n.noAdsPrice(premium.price ?? ''), style: const TextStyle(color: accent)),
             ),
             TextButton(
               key: const Key('restore'),
               onPressed: premium.restore,
-              child: const Text('Restore purchase', style: TextStyle(color: Colors.white54)),
+              child: Text(l10n.restorePurchase, style: const TextStyle(color: Colors.white54)),
             ),
           ]);
         },
@@ -42,12 +44,13 @@ class RemoveAdsButtons extends StatelessWidget {
 Future<bool> askParent(BuildContext context, Random random) async {
   final a = 6 + random.nextInt(4), b = 6 + random.nextInt(4);
   final controller = TextEditingController();
+  final l10n = AppLocalizations.of(context);
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Ask a grown-up'),
+      title: Text(l10n.parentGateTitle),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text('To continue, enter the answer to $a × $b'),
+        Text(l10n.parentGateQuestion(a, b)),
         TextField(
           key: const Key('parentAnswer'),
           controller: controller,
@@ -56,11 +59,11 @@ Future<bool> askParent(BuildContext context, Random random) async {
         ),
       ]),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
         FilledButton(
           key: const Key('parentOk'),
           onPressed: () => Navigator.pop(context, int.tryParse(controller.text.trim()) == a * b),
-          child: const Text('Continue'),
+          child: Text(l10n.continueAction),
         ),
       ],
     ),
