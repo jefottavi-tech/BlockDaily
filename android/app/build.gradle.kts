@@ -2,6 +2,8 @@ plugins {
     id("com.android.application")
     // Reads google-services.json (Firebase project block-daily-b71d6) for Remote Config.
     id("com.google.gms.google-services")
+    // Uploads R8 mapping files so release crash reports stay readable.
+    id("com.google.firebase.crashlytics")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
