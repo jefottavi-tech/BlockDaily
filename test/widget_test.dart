@@ -190,6 +190,9 @@ void main() {
     await tester.tap(find.byKey(const Key('play')));
     await tester.pumpAndSettle();
     var game = (tester.widget<GameScreen>(find.byType(GameScreen))).game;
+    // The new game deals random pieces; use a known one so the drop lands every time.
+    game.tray[0] = piecesById['dot'];
+    await tester.pump();
     final piece = game.tray[0]!;
     await drag(tester, game, 0, 0, 0);
     await tester.pumpAndSettle();
