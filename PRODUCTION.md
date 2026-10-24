@@ -1,6 +1,6 @@
 # Block Daily: remaining steps to production (Google Play)
 
-Status as of 2026-10-24 (end of day). Android first; iOS needs an Apple developer account (later).
+Status as of 2026-10-24: **submitted for Google review** (build 37, all countries, managed publishing off, so it goes live automatically on approval). Android first; iOS needs an Apple developer account (later).
 **Owner:** *you* = the account owner, *Claude* = can be done by Claude, *Google* = waiting on Google.
 
 ## Done
@@ -31,31 +31,31 @@ Status as of 2026-10-24 (end of day). Android first; iOS needs an Apple develope
 ### 3. First upload: internal testing (*Claude*)
 - [x] Release **1 (1.0.0)** uploaded and published to internal testing; Play App Signing on. Next builds: `tools/build_release.sh` (automatic build number).
 - [x] Tester list "KallisteSoft team" (jef.ottavi@gmail.com); opt-in link https://play.google.com/apps/internaltest/4701576584002610767
-- [ ] **You:** uninstall the debug build, opt in, install from Play on the Pixel ("Item not found" at first: new apps take a while to propagate).
+- [x] Installed from Play on the Pixel. Build **37 (1.0.0, with French)** published to internal testing.
 
 ### 4. Remove Ads product (*Claude*, after step 3)
 - [x] `remove_ads` created and **active**: purchase option `buy`, 3,99 CAD (2,89 USD), 174 countries/regions, backward compatible.
 - [x] License testers: the "KallisteSoft team" list (free test purchases).
-- [ ] On the Pixel: buy, then check the banner and interstitials are gone; reinstall, then Restore purchase.
+- [x] On the Pixel: purchase removes the banner and interstitials; Restore purchase works after reinstall.
 
 ### 5. Store listing and policy forms (*Claude* drafts through Chrome, *you* review)
-- [ ] Short and full description (EN; FR next).
-- [ ] Phone screenshots (from the emulator), 1024×500 feature graphic, 512 px icon.
-- [ ] Content rating questionnaire (expected: Everyone / PEGI 3).
-- [ ] Target audience **13+** (family-friendly, not designed for children).
-- [ ] Ads declaration: **contains ads**.
-- [ ] **Data safety**: advertising ID (AdMob), Firebase installation ID (Remote Config, Crashlytics), crash logs and diagnostics (Crashlytics), purchase history (Play), approximate location from IP (ads); no account, no data sold.
-- [ ] Privacy policy URL: https://kallistesoft.ca/en/privacy/block-daily/
-- [ ] App access: no login needed.
+- [x] Short and full description: en-US, fr-FR, fr-CA. AI-content declaration: assets not labeled (real screenshots, code-drawn graphics).
+- [x] Phone screenshots (EN and FR), 1024×500 feature graphic (EN and FR), 512 px icon.
+- [x] Content rating: ESRB Everyone, PEGI 3 (Brazil 14+ because of the in-app purchase).
+- [x] Target audience **13+** (family-friendly, not designed for children).
+- [x] Ads declaration: **contains ads**.
+- [x] **Data safety**: advertising ID (AdMob), Firebase installation ID (Remote Config, Crashlytics), crash logs and diagnostics (Crashlytics), purchase history (Play), approximate location from IP (ads); no account, no data sold.
+- [x] Privacy policy URL: https://kallistesoft.ca/en/privacy/block-daily/
+- [x] App access: no login needed.
 
 ### 6. Final checks (*you* plus *Claude*)
-- [ ] 10-minute play session on the Pixel (internal test build from Play): full-screen ad, Continue video, Remove Ads purchase, daily share.
+- [x] Play session on the Pixel (build 37 from Play): language, Remove Ads purchase and restore. Ads can only be checked after launch (AdMob limited serving).
 - [ ] Release build smoke test on the emulator (startup, no crash).
 - [ ] Bank account verified in the payments profile (*Google*: test deposit, then *you* confirm the amount).
 
 ### 7. Production release (*you* press the button)
-- [ ] Promote the internal build to production (all countries except where Play isn't available).
-- [ ] Google review: usually a few days for a new app.
+- [x] Production release: build 37, all 177 countries/regions plus rest of world, release notes EN/FR; sent for review on 2026-10-24.
+- [ ] *Google* review: usually 1 to 7 days for a new app; goes live automatically when approved.
 
 ### 8. Right after launch (*Claude*)
 - [ ] Link the AdMob app to the Play listing (lifts limited ad serving; AdMob reviews the app).
@@ -65,7 +65,6 @@ Status as of 2026-10-24 (end of day). Android first; iOS needs an Apple develope
 ## Later (not blocking launch)
 
 - Automated tests: PR CI with Android builds, a release smoke test on an emulator, and integration tests (deferred on 2026-10-24).
-- Store listing in 15+ languages, then in-app translations.
-- Share link (Play Store URL) in the daily result text, plus sharing for classic games.
+- More languages (store listing and in-app); French is done.
 - iOS release (Apple developer account, AdMob iOS app, App Store Connect).
 - The same branded icons for Neon Breaker, Void Raid, Neon Pop, Neon Snake and Neon Stack.
