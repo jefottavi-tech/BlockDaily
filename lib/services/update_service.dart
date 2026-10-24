@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_update/in_app_update.dart';
@@ -15,6 +14,7 @@ UpdateStatus updateStatusFor({required int build, required int minVersion, requi
 }
 
 /// Force / suggest updates from Firebase Remote Config (project block-daily-b71d6).
+/// Firebase is started by [initCrashReporting] before this runs.
 ///
 /// Parameters (Number): `min_version_code` blocks older builds, `recommended_version_code` offers the update.
 /// Debug builds read the `_debug` variants instead, so the screens can be tried without touching players.
@@ -29,7 +29,6 @@ class UpdateService {
   Future<void> check() async {
     try {
       _build = int.tryParse((await PackageInfo.fromPlatform()).buildNumber) ?? 0;
-      await Firebase.initializeApp();
       final config = FirebaseRemoteConfig.instance;
       await config.setDefaults({
         for (final name in ['min_version_code', 'recommended_version_code']) ...{name: 0, '${name}_debug': 0},

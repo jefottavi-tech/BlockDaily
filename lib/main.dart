@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'services/ad_service.dart';
 import 'services/admob_ad_service.dart';
+import 'services/crash_reporting.dart';
 import 'services/premium_service.dart';
 import 'services/sound_service.dart';
 import 'services/stats_store.dart';
@@ -28,6 +29,11 @@ Future<void> main() async {
   VoidCallback? showPrivacyOptions;
   UpdateService? updates;
   if (mobile) {
+    try {
+      await initCrashReporting();
+    } catch (_) {
+      // Never block the game because Firebase couldn't start.
+    }
     final admob = AdMobAdService();
     final store = StorePremiumService(stats);
     premium = store;
