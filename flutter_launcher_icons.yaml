@@ -3,8 +3,9 @@
 flutter_launcher_icons:
   image_path: "assets/icon/icon.png"
   android: "ic_launcher"
-  adaptive_icon_background: "#16213E"
+  adaptive_icon_background: "assets/icon/background.png"
   adaptive_icon_foreground: "assets/icon/foreground.png"
+  adaptive_icon_foreground_inset: 0 # foreground.png is already laid out for the crop
   ios: true
   remove_alpha_ios: true
   web:
