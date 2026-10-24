@@ -4,6 +4,8 @@ import 'package:in_app_update/in_app_update.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'share_text.dart';
+
 enum UpdateStatus { none, recommended, required }
 
 /// Compares this build with the versions set in Remote Config (0 = no requirement).
@@ -19,8 +21,6 @@ UpdateStatus updateStatusFor({required int build, required int minVersion, requi
 /// Parameters (Number): `min_version_code` blocks older builds, `recommended_version_code` offers the update.
 /// Debug builds read the `_debug` variants instead, so the screens can be tried without touching players.
 class UpdateService {
-  static const _playUrl = 'https://play.google.com/store/apps/details?id=ca.kallistesoft.block_daily';
-
   final status = ValueNotifier(UpdateStatus.none);
   int _build = 0;
 
@@ -60,6 +60,6 @@ class UpdateService {
     } catch (_) {
       // Not installed from Play (test builds) or Play unavailable.
     }
-    await launchUrl(Uri.parse(_playUrl), mode: LaunchMode.externalApplication);
+    await launchUrl(Uri.parse(playStoreUrl), mode: LaunchMode.externalApplication);
   }
 }

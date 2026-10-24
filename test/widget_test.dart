@@ -143,6 +143,7 @@ void main() {
     expect(find.byKey(const Key('revive')), findsNothing);
     expect(stats.bestScore, game.score);
     expect(find.text('🏆 New best!'), findsOneWidget);
+    expect(find.byKey(const Key('share')), findsOneWidget, reason: 'classic games can be shared too');
 
     await tester.tap(find.byKey(const Key('again')));
     await tester.pump();

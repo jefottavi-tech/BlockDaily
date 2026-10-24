@@ -207,6 +207,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _share() async {
+    if (!_isDaily) {
+      await shareText(context, classicShareText(score: game.score, newBest: _newBest));
+      return;
+    }
     final result = _stats.daily(game.dailyNumber!);
     if (result == null) return;
     await shareText(context, dailyShareText(result, streak: _stats.dailyStreak(game.dailyNumber!)));
@@ -487,8 +491,17 @@ class _GameOverPanel extends StatelessWidget {
                   icon: const Icon(Icons.ios_share_rounded),
                   label: const Text('Share result'),
                 )
-              else
+              else ...[
                 OutlinedButton(key: const Key('again'), style: small, onPressed: onPlayAgain, child: const Text('Play again')),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  key: const Key('share'),
+                  style: small,
+                  onPressed: onShare,
+                  icon: const Icon(Icons.ios_share_rounded),
+                  label: const Text('Share score'),
+                ),
+              ],
               const SizedBox(height: 12),
               OutlinedButton(key: const Key('home'), style: small, onPressed: onHome, child: const Text('Home')),
             ]),
