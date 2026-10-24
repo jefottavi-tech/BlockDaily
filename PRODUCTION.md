@@ -17,7 +17,8 @@ Status as of 2026-10-24. Android first; iOS needs an Apple developer account (la
 ## Remaining
 
 ### 1. Privacy policy live (*you*)
-- [ ] Merge kallistesoft-site#1 (Block Daily section: ads, consent, Remote Config, Remove Ads). Must be live before the store listing.
+- [x] Block Daily section live (kallistesoft-site#1).
+- [ ] Merge kallistesoft-site#2: dedicated page /en/privacy/block-daily/. Then point the AdMob EU consent message for Block Daily at it (*Claude*).
 
 ### 2. Release signing (*Claude*, then *you* back it up)
 - [ ] Create the upload keystore and wire it into the release build (`key.properties`, kept out of git). Release builds are still signed with the debug key.
@@ -47,7 +48,7 @@ Status as of 2026-10-24. Android first; iOS needs an Apple developer account (la
 - [ ] Target audience **13+** (family-friendly, not designed for children).
 - [ ] Ads declaration: **contains ads**.
 - [ ] **Data safety**: advertising ID (AdMob), Firebase installation ID (Remote Config), purchase history (Play), approximate location from IP (ads); no account, no data sold.
-- [ ] Privacy policy URL: https://kallistesoft.ca/en/privacy/
+- [ ] Privacy policy URL: https://kallistesoft.ca/en/privacy/block-daily/ (FR: /confidentialite/block-daily/)
 - [ ] App access: no login needed.
 
 ### 8. Final checks (*you* plus *Claude*)
